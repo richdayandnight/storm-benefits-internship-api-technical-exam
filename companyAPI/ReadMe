@@ -1,0 +1,217 @@
+Richelle Yap
+April 22, 2018
+
+This is an API that manages a list of companies.
+
+To run this API:
+1. Either install a Python IDE or create a Python virtual environment to install the packages required
+2. Install mysql
+3. Install packages required
+4. Install Postman extension in Chrome or install curl
+
+My setup configuration:
+> Operating System: macOS
+> Python 3.6.2
+> Flask 0.12.2
+> SQLAlchemy 1.2.0b3
+> MySQL 5.7.22
+
+My setup procedure:
+1. Install Pycharm (www.jetbrains.com/pycharm/download/)
+    1.1 Create a New Project (File -> New Project)
+    1.2 Choose Flask on the left pane, location of the project, and base project interpreter to be used
+        * Base Project Interpreter: pyenv version 3.6.2 ('path to .pyenv version 3.6.2'/bin/python)
+            (pyenv was installed before creating the new project through 'pyenv install 3.6.3')
+        * In my case, when I tried to use the suggested base interpreter set by Pycharm,
+        installing packages only appeared to be successful according to the response message, but
+        the packages do not appear in the package list and modules imported from them do not get
+        resolved. Thus, I resorted to the pyenv.
+    1.3 Install packages to project interpreter (Pycharm -> Preferences -> Project -> Project Interpreter
+        -> plus button on the lower left side of the package table)
+        * Add packages Flask ver. 0.12.2, SQLAlchemy 1.2.0b3
+2. Install MySQL
+    2.1 Run
+        $ brew install mysql
+    2.2 Load and start mysql service
+        $ brew tap homebrew/services
+        $ brew services start mysql
+        * You can set a password to your sql
+            $ mysqladmin -u root password 'yourpassword'
+    2.3 Create database through piping
+            mysql -uroot < /Users/<user_name>/PycharmProjects/companyAPI/create_db.sql
+         * NOTE: depending on your mysql config, you need to provide your password if you have one
+3. Initialize and Populate Company Database
+    3.1 Edit line 5 of database.py and use the correct url to your mysql
+        * In my case, I'm using the the root and I had no password set so the link is
+        'mysql://root@localhost/Company'
+        * If there's a password, you'll need at change this url to 'mysql://root:<PASSWORD>@localhost/Company'
+            Assuming that you're also using the root user.
+    3.2 Either run the line below
+        $ sh script.sh
+
+        OR
+    3.3 Use the python interactive shell and run the lines below
+        $ python
+        >> from companyAPI.database import init_db;
+        >> init_db();
+        >> from companyAPI.populate import populate;
+        >> populate()
+
+4. Run the API project in Pycharm by clicking on the play button on the upper right hand corner
+    or run through ctrl+R
+
+Test cases using Postman extension in Chrome:
+I. Insert a new company record
+    1. Choose POST
+    2. Set address to http://127.0.0.1:5000
+    3. Put the following in the Body and choose JSON(application/json in the dropdown menu)
+
+{
+    "name": "Company_tempname",
+    "employees_num": 100,
+    "email": "info@company.com",
+    "location": "Philippines",
+    "industry": "Franchising"
+}
+
+    3.1 Here's the curl version of this
+
+curl -X POST \
+  http://127.0.0.1:5000/ \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -H 'postman-token: c0db7776-aa16-7702-7467-7a3bca90a5a7' \
+  -d '{
+    "name": "Company_tempname",
+    "employees_num": 100,
+    "email": "info@company.com",
+    "location": "Philippines",
+    "industry": "Franchising"
+}'
+
+    4. You can also add multiple company records
+[
+{
+    "name": "Company_tempname",
+    "employees_num": 100,
+    "email": "info@company.com",
+    "location": "Philippines",
+    "industry": "Franchising"
+},
+{
+    "name": "Company_tempname2",
+    "employees_num": 50,
+    "email": "info@company2.com",
+    "location": "Philippines",
+    "industry": "Agribusiness"
+}
+]
+
+    4.1 You can generate the curl code snippet when you click on the Code link underneath the
+        adress bar
+
+    5. Send the HTTP request
+    6. Check if they're added in the database by sending GET to http://127.0.0.1:5000
+
+
+II. Update an existing company record
+    1. Choose PUT
+    2. Set address to http://127.0.0.1:5000/<company_id> (where company_id is the primary key
+    of the company record you want to update)
+    3. Put the following in the Body and choose JSON(application/json in the dropdown menu)
+
+{
+    "email": "feedback@mcdo.com",
+    "employees_num": 9999,
+    "industry": "Food",
+    "location": "Philippines",
+    "name": "Mcdonalds"
+}
+
+    4. Send the HTTP request to http://127.0.0.1:5000/1 (This contains the Jollibee company record)
+    5. Check if Mcdonalds company record replaced the previously Jollibee record stored
+     by sending GET to http://127.0.0.1:5000
+
+III. Delete company record
+    1. Choose DELETE
+    2. Set address to http://127.0.0.1:5000/<company_id> (where company_id is the primary key
+    of the company record you want to delete)
+
+    * example: http://127.0.0.1:5000/1
+    ** this is the company record now containing Mcdo if you followed part II.
+    3. Send the HTTP request
+    4. Check if the company record is deleted by sending GET to http://127.0.0.1:5000
+
+IV. Get company record details
+    1. Choose GET
+    2. Set address to http://127.0.0.1:5000/<company_id> (where company_id is the primary key
+    of the company record you want to get/view)
+
+    * example: http://127.0.0.1:5000/1
+    ** this company record does not exist if you followed part III.
+
+    3. Send the HTTP request
+    4. This should return
+    {
+        "error": "Not found"
+    }
+
+    5. Try setting the address to http://127.0.0.1:5000/2
+    6. This should display the Google company record given that you've beem following from part I
+
+V. List all company records
+    1. Choose GET
+    2. Set address to http://127.0.0.1:5000/
+    4. Send the HTTP request
+    6. Check if all company records are listed by opening mysql and to query all the records of
+        the company table
+        > Use Company
+        > Select * from company
+
+VI. Filter list of companies using wildcard search
+    1. Choose POST
+    2. Set address to http://127.0.0.1:5000/search
+    3. Put the following in the Body and choose JSON(application/json in the dropdown menu)
+
+{
+    "value": '<company_name to be searched>'
+}
+
+for example:
+{
+    "value": "Comp"
+}
+
+    4. This should return list of companies with the substring "Comp" in it
+    Note: This is case insensitive
+
+sample output:
+{
+    "Companies": [
+        {
+            "email": "info@company.com",
+            "employees_num": 100,
+            "id": 3,
+            "industry": "Franchising",
+            "location": "Philippines",
+            "name": "Company_tempname"
+        },
+        {
+            "email": "info@company.com",
+            "employees_num": 100,
+            "id": 4,
+            "industry": "Franchising",
+            "location": "Philippines",
+            "name": "Company_tempname"
+        },
+        {
+            "email": "info@company2.com",
+            "employees_num": 50,
+            "id": 5,
+            "industry": "Agribusiness",
+            "location": "Philippines",
+            "name": "Company_tempname2"
+        }
+    ]
+}
+

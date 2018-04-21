@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Company</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.1/semantic.min.css">
+</head>
+<body>
+<table class="ui compact celled definition table">
+    <thead class="full-width">
+    <tr>
+        <th>Company</th>
+        <th>Number of Employees</th>
+        <th>Location</th>
+        <th>E-mail address</th>
+        <th>Industry</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for company in companies %}
+    <tr>
+        <td> {{ company.name }} </td>
+        <td> {{ company.employees_num }} </td>
+        <td> {{ company.location }} </td>
+        <td> {{ company.email }}</td>
+        <td> {{ company.industry }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+    <tfoot class="full-width">
+    <tr>
+        <th colspan="5">
+            <div class="ui right floated small primary labeled icon button">
+                <i class="user icon"></i> Add User
+            </div>
+        </th>
+    </tr>
+    </tfoot>
+</table>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.1/semantic.min.js"></script>
+</body>
+</html>
