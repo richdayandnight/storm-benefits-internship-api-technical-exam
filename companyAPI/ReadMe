@@ -215,3 +215,8 @@ sample output:
     ]
 }
 
+
+1. Post / if duplicate
+2. Delete if not existing
+3. Edit/Put if not existing
+4. Get /specific

@@ -2,7 +2,7 @@ from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 # Connect to mysql database
-engine = create_engine('mysql://root@localhost/Company', convert_unicode=True)
+engine = create_engine('mysql://root:password@localhost/Company', convert_unicode=True)
 metadata = MetaData()
 
 # db_session, used for persistence operation (connection) to the database

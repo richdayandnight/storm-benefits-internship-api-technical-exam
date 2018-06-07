@@ -32,7 +32,7 @@ class Company(object):
 # Metadata of the company table
 company = Table('company', metadata,
     Column('id', Integer, primary_key=True),
-    Column('name', String(120)),
+    Column('name', String(120), unique=True, nullable=False),
     Column('employees_num', Integer),
     Column('location', String(120)),
     Column('email', String(120)),

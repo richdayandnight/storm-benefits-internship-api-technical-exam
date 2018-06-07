@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, abort, make_response
 from companyAPI.database import db_session
 from companyAPI.models import Company
+from sqlalchemy import exc
 
 # initialize Flask app
 app = Flask(__name__)
@@ -19,9 +20,11 @@ def create_company():
     if not request.json:
         abort(400)
     content = request.get_json()
+    if type(content['name']) != str:
+        return make_response(jsonify({'error':'Company name should be a string'}), 400)
     # used a try - except to know if the json sent by the client
     # is a json object or a json array
-    try:
+    '''try:
         i = 0
         while i != len(content):
             # Add the company records to the database
@@ -33,9 +36,12 @@ def create_company():
             db_session.add(company_temp)
             db_session.commit()
             i = i + 1
-        return jsonify(content), 201
-    except Exception:
-        # Add the company record to the database
+        return jsonify(content), 201'''
+
+    # Add the company record to the database
+
+    #exists = Company.query(Company.name).filter_by(name=content['name'])).scalar()
+    try:
         company_temp = Company(name=content['name'],
                                employees_num=content['employees_num'],
                                location=content['location'],
@@ -44,6 +50,8 @@ def create_company():
         db_session.add(company_temp)
         db_session.commit()
         return jsonify(content), 201
+    except exc.IntegrityError as e:
+        return make_response(jsonify({'error': 'Duplicate company name'}), 400)
 
 
 # GET a specific company record through their company_id (primary key)
@@ -52,7 +60,7 @@ def get_company(company_id):
     companies = Company.query.all()
     company = [company for company in companies if company.id == company_id]
     if len(company) == 0:
-        abort(404)
+        return make_response(jsonify({'error': 'Not found'}), 404)
     return jsonify(Company=Company.serialize(company[0]))
 
 
@@ -67,26 +75,28 @@ def update_company(company_id):
     if not request.json:
         abort(400)
     if 'name' in request.json and type(request.json['name']) != str:
-        abort(400)
+        return make_response(jsonify({'error': 'Company name not a string'}), 400)
     if 'employees_num' in request.json and type(request.json['employees_num']) is not int:
-        abort(400)
+        return make_response(jsonify({'error': 'Employees_num not an int'}), 400)
     if 'location' in request.json and type(request.json['location']) is not str:
-        abort(400)
+        return make_response(jsonify({'error': 'Location not a string'}), 400)
     if 'email' in request.json and type(request.json['email']) is not str:
-        abort(400)
+        return make_response(jsonify({'error': 'Email not a string'}), 400)
     if 'industry' in request.json and type(request.json['industry']) is not str:
-        abort(400)
+        return make_response(jsonify({'error': 'Industry not a string'}), 400)
     content = request.get_json()
     # updating the requested company record
-    queried_company = Company.query.get(company_id)
-    queried_company.name = content['name']
-    queried_company.employees_num = content['employees_num']
-    queried_company.location = content['location']
-    queried_company.email = content['email']
-    queried_company.industry = content['industry']
-    db_session.commit()
-    return jsonify(content)
-
+    try:
+        queried_company = Company.query.get(company_id)
+        queried_company.name = content['name']
+        queried_company.employees_num = content['employees_num']
+        queried_company.location = content['location']
+        queried_company.email = content['email']
+        queried_company.industry = content['industry']
+        db_session.commit()
+        return jsonify(content)
+    except exc.IntegrityError as e:
+        return make_response(jsonify({'error': 'Duplicate company name'}), 400)
 
 # DELETE a specific company record through their company_id (primary key)
 @app.route('/<int:company_id>', methods=['DELETE'])
