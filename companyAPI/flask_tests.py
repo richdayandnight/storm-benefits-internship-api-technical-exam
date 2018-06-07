@@ -3,13 +3,40 @@ import unittest
 import json
 
 
-class MyAppCase(unittest.TestCase):
+class CompanyAppTest(unittest.TestCase):
     def setUp(self):
         self.app = app.test_client()
         self.app.testing = True
 
-    # test Getting a company information
-    # in this function, we try to get the information from the company with id = 1
+    """
+        Test Getting Company Information of a Company
+
+        This function tests the companyAPI's function to return the right information of the company with id = 1
+
+        Parameters
+        ----------
+        self : flask_tests.CompanyAppTest
+            an instance of the app
+
+        Returns
+        -------
+        None
+        
+        Expected Success Response
+        -------------------------
+        OK
+        
+        Expected Fail Response
+        -------------------------
+        FAILED
+
+        {'Company': {'email': 'feedback@jollibee.com',
+             'employees_num': 9999,
+             'id': 1,
+             'industry': 'Food',
+             'location': 'Philippines',
+             'name': 'Jollibee Foods Corporation'}}  != <json returned by the test_client>
+    """
     def test_get_company(self):
         print("Test_get_company")
         response = self.app.get("/1")
@@ -26,22 +53,73 @@ class MyAppCase(unittest.TestCase):
         # for key in data['Company']:
         # self.assertEqual(data['Company'][key], sample_data[key])
         self.assertEqual(json.loads(response.get_data().decode()), Company)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200, "Getting details of a company unsuccessful")
 
-    # test Getting a company information from a non existing company
-    # in this function, we try to get the information from the company with id = 999
+    """
+        Test Getting Company Information of a non-existing Company
+
+        This function tests the companyAPI's function to return the error message 
+        when trying to access a non-existing company where id = 999.
+
+        Parameters
+        ----------
+        self : flask_tests.CompanyAppTest
+            an instance of the app
+
+        Returns
+        -------
+        None
+
+        Expected Success Response
+        -------------------------
+        OK
+
+        Expected Fail Response
+        -------------------------
+        FAILED
+
+        {"error": "Not found"} != <json returned by the test_client>
+    """
     def test_get_empty_company(self):
         print("Test_get_empty_company")
         response = self.app.get("/999")
-        sample_data = {
+        error = {
             "error": "Not found"
         }
-        # print(sample_data['email'])
-        data = json.loads(response.get_data(as_text=True))
-        self.assertEqual(data['error'], sample_data["error"])
+        self.assertEqual(json.loads(response.get_data().decode()), error)
+        self.assertEqual(response.status_code, 404)
 
-    # test Posting a valid company information
-    # in this function, we try to add a new company named Company_tempname to the database
+    """
+        Test Adding (Post) a Company with valid company information
+
+        This function tests the companyAPI's function to receive company's data
+        and insert this information to the database.
+
+        Parameters
+        ----------
+        self : flask_tests.CompanyAppTest
+            an instance of the app
+
+        Returns
+        -------
+        None
+
+        Expected Success Response
+        -------------------------
+        OK
+
+        Expected Fail Response
+        -------------------------
+        FAILED
+
+        {
+            "name": "Company_tempname",
+            "employees_num": 100,
+            "email": "info@company.com",
+            "location": "Philippines",
+            "industry": "Franchising"
+        } != <json returned by the test_client>
+    """
     def test_post_company(self):
         print("Test_post_company")
         sample_data = {
@@ -58,12 +136,37 @@ class MyAppCase(unittest.TestCase):
         error = {"error": "Duplicate company name"}
         try:
             self.assertEqual(json.loads(response.get_data().decode()), sample_data)
+            self.assertEqual(response.status_code, 200)
         #  the following exception should be commented in real testing
         except Exception as e:
             self.assertEqual(json.loads(response.get_data().decode()), error)
+            self.assertEqual(response.status_code, 400)
 
-    # test Posting a company information with duplicate company name
-    # in this function, we try to add a new company with a duplicate name already existing in the database
+    """
+        Test Adding (Post) a Company with a Similar Company Name in the Database
+
+        This function tests the companyAPI's function to return an error when 
+        receiving a company data with a name similar to the companies listed in the database.
+
+        Parameters
+        ----------
+        self : flask_tests.CompanyAppTest
+            an instance of the app
+
+        Returns
+        -------
+        None
+
+        Expected Success Response
+        -------------------------
+        OK
+
+        Expected Fail Response
+        -------------------------
+        FAILED
+
+        {"error": "Duplicate company name"} != <json returned by the test_client>
+    """
     def test_post_duplicate_company_name(self):
         print("Test_post_duplicate_company_name")
         sample_data = {
@@ -79,9 +182,33 @@ class MyAppCase(unittest.TestCase):
                                  data=json.dumps(sample_data),
                                  content_type='application/json')
         self.assertEqual(json.loads(response.get_data().decode()), error)
+        self.assertEqual(response.status_code, 400)
 
-    # test Deleting a company information
-    # in this function, we try to delete an existing company (where company id = 2)
+    """
+        Test Deleting a Company
+
+        This function tests the companyAPI's function to delete a 
+        company in the database.
+
+        Parameters
+        ----------
+        self : flask_tests.CompanyAppTest
+            an instance of the app
+
+        Returns
+        -------
+        None
+
+        Expected Success Response
+        -------------------------
+        OK
+
+        Expected Fail Response
+        -------------------------
+        FAILED
+
+       delete = {"Delete": True} != <json returned by the test_client>
+    """
     def test_delete_company(self):
         print("Test_delete_company")
         company_id = 2
@@ -91,21 +218,77 @@ class MyAppCase(unittest.TestCase):
         delete = {"Delete": True}
         try:
             self.assertEqual(json.loads(response.get_data().decode()), delete)
+            self.assertEqual(response.status_code, 200)
         #  the following exception should be commented in real testing
         except Exception as e:
             self.assertEqual(json.loads(response.get_data().decode()), error)
+            self.assertEqual(response.status_code, 404)
 
-    # test Deleting a company information
-    # in this function, we try to delete a non-existing company (where company id = 999)
+    """
+        Test Deleting a non-existing Company
+
+        This function tests the companyAPI's function to return an error message
+        when trying to delete a non-existing company.
+
+        Parameters
+        ----------
+        self : flask_tests.CompanyAppTest
+            an instance of the app
+
+        Returns
+        -------
+        None
+
+        Expected Success Response
+        -------------------------
+        OK
+
+        Expected Fail Response
+        -------------------------
+        FAILED
+
+        {"error": "Not found"} != <json returned by the test_client>
+    """
     def test_delete_nonexisting_company(self):
         print("Test_delete_nonexisting_company")
         company_id = 999
         response = self.app.delete('/' + str(company_id))
         error = {"error": "Not found"}
         self.assertEqual(json.loads(response.get_data().decode()), error)
+        self.assertEqual(response.status_code, 404)
 
     # test Putting a company information
     # in this function, we try to edit an existing company's information
+    """
+        Test Editing a Company Information 
+
+        This function tests the companyAPI's function to edit a company's information.
+
+        Parameters
+        ----------
+        self : flask_tests.CompanyAppTest
+            an instance of the app
+
+        Returns
+        -------
+        None
+
+        Expected Success Response
+        -------------------------
+        OK
+
+        Expected Fail Response
+        -------------------------
+        FAILED
+
+        {
+            "email": "feedback@jollibee.com",
+            "employees_num": 9999,
+            "industry": "Food",
+            "location": "Philippines",
+            "name": "Jollibee Foods Corporation"
+        } != <json returned by the test_client>
+    """
     def test_put_company(self):
         print("Test_put_company")
         company_id = 1
@@ -120,9 +303,35 @@ class MyAppCase(unittest.TestCase):
                                 data=json.dumps(sample_data),
                                 content_type='application/json')
         self.assertEqual(json.loads(response.get_data().decode()), sample_data)
+        self.assertEqual(response.status_code, 200)
 
     # test Putting a company information
     # in this function, we try to edit a company's name to a duplicate of another company
+    """
+        Test Editing a Company Information with a Similar Company Name in the Database
+
+        This function tests the companyAPI's function to return an error when 
+        editing a company name to a new company name similar to the companies listed in the database.
+        
+        Parameters
+        ----------
+        self : flask_tests.CompanyAppTest
+            an instance of the app
+
+        Returns
+        -------
+        None
+
+        Expected Success Response
+        -------------------------
+        OK
+
+        Expected Fail Response
+        -------------------------
+        FAILED
+
+        {"error": "Duplicate company name"} != <json returned by the test_client>
+    """
     def test_put_duplicate_company_name(self):
         print("Test_put_duplicate_company_name")
         company_id = 1
@@ -138,9 +347,33 @@ class MyAppCase(unittest.TestCase):
                                 data=json.dumps(sample_data),
                                 content_type='application/json')
         self.assertEqual(json.loads(response.get_data().decode()), error)
+        self.assertEqual(response.status_code, 400)
 
-    # test Putting a company information
-    # in this function, we try to edit a company name to an invalid company name
+    """
+        Test Editing a Company Information with invalid Company name
+
+        This function tests the companyAPI's function to return an error when 
+        editing a company name to a new company name which is not a string.
+        
+        Parameters
+        ----------
+        self : flask_tests.CompanyAppTest
+            an instance of the app
+
+        Returns
+        -------
+        None
+
+        Expected Success Response
+        -------------------------
+        OK
+
+        Expected Fail Response
+        -------------------------
+        FAILED
+
+        {"error": "Company name not a string"} != <json returned by the test_client>
+    """
     def test_put_null_company_name(self):
         print("Test_put_duplicate_company_name")
         company_id = 1
@@ -156,9 +389,33 @@ class MyAppCase(unittest.TestCase):
                                 data=json.dumps(sample_data),
                                 content_type='application/json')
         self.assertEqual(json.loads(response.get_data().decode()), error)
+        self.assertEqual(response.status_code, 400)
 
-    # test Putting a company information
-    # in this function, we try to edit a company information of a nonexisting company
+    """
+        Test Editing a Company Information with invalid company id
+
+        This function tests the companyAPI's function to return an error when 
+        editing a non-existing company's information where the id is = 888.
+
+        Parameters
+        ----------
+        self : flask_tests.CompanyAppTest
+            an instance of the app
+
+        Returns
+        -------
+        None
+
+        Expected Success Response
+        -------------------------
+        OK
+
+        Expected Fail Response
+        -------------------------
+        FAILED
+
+        {"error": "Not found"} != <json returned by the test_client>
+    """
     def test_put_non_existing_company(self):
         print("Test_put_non_existing_company")
         company_id = 888
@@ -176,3 +433,4 @@ class MyAppCase(unittest.TestCase):
                                 data=json.dumps(sample_data),
                                 content_type='application/json')
         self.assertEqual(json.loads(response.get_data().decode()), error)
+        self.assertEqual(response.status_code, 404)
