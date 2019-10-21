@@ -27,4 +27,4 @@ Sphinx==1.7.5
 sphinxcontrib-websupport==1.1.0
 SQLAlchemy==1.2.0b3
 urllib3==1.22
-Werkzeug==0.14.1
+Werkzeug==0.15.3
